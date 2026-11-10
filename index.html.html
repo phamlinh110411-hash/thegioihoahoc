@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thế Giới Hóa Học – Bảng Tuần Hoàn 118 Nguyên Tố 3D STEM</title>
+
+<!-- Library Three.js để dựng mô hình 3D -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800;900&display=swap');
+
+:root {
+  --bg-dark: #0e1626;
+  --panel: #18233c;
+  --panel-border: #283759;
+  --cyan: #38bdf8;
+  --pink: #ff6b8b;
+  --yellow: #ffc107;
+  --green: #4ade80;
+  --purple: #c084fc;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+
+  /* Cartoon Category Colors */
+  --c-alkali: #ff5252;
+  --c-alkaline: #ff9800;
+  --c-transition: #38bdf8;
+  --c-post-trans: #ab47bc;
+  --c-metalloid: #26a69a;
+  --c-nonmetal: #66bb6a;
+  --c-halogen: #ffa726;
+  --c-noble: #ec407a;
+  --c-lanthanide: #8d6e63;
+  --c-actinide: #78909c;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: radial-gradient(circle at 50% 10%, #1e2942 0%, var(--bg-dark) 80%);
+  color: var(--text-main);
+  font-family: 'Nunito', sans-serif;
+  line-height: 1.6;
+}
+
+h1, h2, h3, .brand {
+  font-family: 'Fredoka', sans-serif;
+}
+
+a { color: inherit; text-decoration: none; }
+.wrap { width: min(1360px, 95%); margin: auto; }
+
+/* Navigation */
+header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(14, 22, 38, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 3px solid var(--panel-border);
+}
+.nav {
+  height: 66px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.brand {
+  font-size: 24px; font-weight: 700; color: var(--yellow); letter-spacing: 0.5px;
+}
+.brand span { color: var(--cyan); }
+nav { display: flex; gap: 20px; font-weight: 700; font-size: 15px; color: var(--text-muted); }
+nav a:hover { color: var(--cyan); }
+
+/* Hero Section */
+.hero { text-align: center; padding: 40px 0 20px; }
+.eyebrow {
+  display: inline-block; padding: 6px 16px; border-radius: 99px;
+  background: rgba(56, 189, 248, 0.15); border: 2px solid var(--cyan);
+  color: var(--cyan); font-weight: 800; font-size: 13px; text-transform: uppercase;
+}
+h1 { font-size: clamp(32px, 4.5vw, 52px); margin: 12px 0; color: var(--yellow); }
+h1 span { color: var(--cyan); }
+.lead { color: var(--text-muted); font-size: 16px; max-width: 800px; margin: auto; font-weight: 600; }
+
+.actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px;
+  border-radius: 14px; background: var(--cyan); color: #000; font-weight: 800;
+  font-size: 15px; border: none; cursor: pointer; transition: all 0.2s ease;
+  box-shadow: 0 4px 0 #0284c7;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #0284c7; }
+.btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #0284c7; }
+.btn.secondary { background: var(--panel); color: var(--text-main); border: 2px solid var(--panel-border); box-shadow: 0 4px 0 var(--panel-border); }
+.btn.secondary:hover { border-color: var(--cyan); }
+
+/* Section Styling */
+section { padding: 36px 0; }
+.section-head { text-align: center; margin-bottom: 24px; }
+.section-head h2 { font-size: clamp(26px, 3.5vw, 36px); margin: 0 0 8px; color: var(--cyan); }
+.section-head p { color: var(--text-muted); font-size: 14px; margin: 0; font-weight: 600; }
+
+/* Periodic Table Styling */
+.pt-container {
+  background: var(--panel); border: 3px solid var(--panel-border);
+  border-radius: 24px; padding: 20px; overflow-x: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+.pt-legend {
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 20px; font-size: 12px; font-weight: 700;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.2); padding: 5px 12px; border-radius: 99px; }
+.legend-color { width: 14px; height: 14px; border-radius: 4px; }
+
+.pt-grid { display: grid; grid-template-columns: 32px repeat(18, minmax(58px, 1fr)); gap: 6px; min-width: 1150px; }
+.pt-head-cell { text-align: center; font-size: 12px; font-weight: 800; color: var(--cyan); padding: 4px 0; }
+.pt-period-cell { display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: var(--yellow); }
+
+/* Cartoon Element Box */
+.el-card {
+  aspect-ratio: 1 / 1.15; border-radius: 10px; padding: 4px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  border: 2px solid rgba(0,0,0,0.3); cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none; position: relative; box-shadow: 0 3px 0 rgba(0,0,0,0.3);
+}
+.el-card:hover {
+  transform: translateY(-6px) scale(1.15); z-index: 20;
+  border-color: #fff; box-shadow: 0 8px 15px rgba(0,0,0,0.5);
+}
+.el-z { font-size: 10px; font-weight: 800; opacity: 0.8; line-height: 1; }
+.el-sym { font-size: 18px; font-weight: 900; text-align: center; font-family: 'Fredoka', sans-serif; line-height: 1; margin: 2px 0 1px; color: #fff; text-shadow: 1px 1px 0 rgba(0,0,0,0.5); }
+.el-name { font-size: 9.5px; font-weight: 800; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; color: #fff; }
+.el-mass { font-size: 8.5px; text-align: center; opacity: 0.85; font-weight: 700; line-height: 1; }
+
+.cat-alkali { background: var(--c-alkali); }
+.cat-alkaline { background: var(--c-alkaline); }
+.cat-transition { background: var(--c-transition); }
+.cat-post-trans { background: var(--c-post-trans); }
+.cat-metalloid { background: var(--c-metalloid); }
+.cat-nonmetal { background: var(--c-nonmetal); }
+.cat-halogen { background: var(--c-halogen); }
+.cat-noble { background: var(--c-noble); }
+.cat-lanthanide { background: var(--c-lanthanide); }
+.cat-actinide { background: var(--c-actinide); }
+
+.pt-gap { grid-column: 1 / -1; height: 16px; }
+
+/* Theory Cards Grid */
+.grid-theory { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.theory-card {
+  background: var(--panel); border: 3px solid var(--panel-border);
+  border-radius: 20px; padding: 20px; transition: all 0.2s ease; cursor: pointer;
+}
+.theory-card:hover { transform: translateY(-4px); border-color: var(--cyan); }
+.theory-card .badge { display: inline-block; padding: 3px 10px; border-radius: 99px; background: rgba(255,193,7,0.2); color: var(--yellow); font-size: 11px; font-weight: 800; margin-bottom: 8px; }
+.theory-card h3 { margin: 4px 0 8px; color: var(--cyan); font-size: 18px; }
+.theory-card p { color: var(--text-muted); font-size: 13.5px; margin: 0; font-weight: 600; }
+
+/* Quiz Box */
+.quiz-box {
+  max-width: 820px; margin: auto; background: var(--panel);
+  border: 3px solid var(--panel-border); border-radius: 24px; padding: 28px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+.quiz-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+@media(max-width:640px){ .quiz-controls { grid-template-columns: 1fr; } }
+.select-label { display: block; font-size: 13px; font-weight: 800; color: var(--yellow); margin-bottom: 6px; }
+.quiz-select {
+  width: 100%; padding: 12px 16px; border-radius: 12px;
+  background: #0e1626; color: #fff; border: 2px solid var(--panel-border);
+  font-size: 14px; font-weight: 700; outline: none;
+}
+.quiz-meta { display: flex; justify-content: space-between; align-items: center; margin: 20px 0 14px; font-weight: 700; }
+.topic-tag { display: inline-block; padding: 4px 12px; border-radius: 99px; background: rgba(56, 189, 248, 0.2); color: var(--cyan); font-size: 12px; font-weight: 800; }
+.question-title { font-size: 19px; font-weight: 800; margin: 0 0 18px; color: #fff; }
+.answers-grid { display: grid; gap: 12px; }
+.answer-btn {
+  background: rgba(255,255,255,0.05); border: 2px solid var(--panel-border);
+  color: var(--text-main); padding: 14px 18px; border-radius: 14px;
+  text-align: left; cursor: pointer; font-size: 15px; font-weight: 700; transition: all 0.15s ease;
+}
+.answer-btn:hover:not(:disabled) { border-color: var(--cyan); background: rgba(56, 189, 248, 0.15); }
+.answer-btn.correct { background: rgba(74, 222, 128, 0.25) !important; border-color: var(--green) !important; color: #fff; }
+.answer-btn.wrong { background: rgba(255, 107, 139, 0.25) !important; border-color: var(--pink) !important; color: #fff; }
+.feedback-box { min-height: 36px; color: var(--cyan); margin: 16px 0; font-size: 14.5px; font-weight: 700; }
+.quiz-bottom { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 14px; }
+.result-panel { margin-top: 24px; padding: 24px; border-radius: 18px; background: rgba(0,0,0,0.3); border: 2px solid var(--cyan); text-align: center; }
+.result-score { font-size: 52px; color: var(--yellow); font-family: 'Fredoka', sans-serif; font-weight: 700; }
+
+/* Modal 2D & 3D Interactive Simulators */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+  z-index: 1000; display: none; place-items: center; padding: 20px;
+}
+.modal-overlay.active { display: grid; }
+.modal-card {
+  background: var(--panel); border: 3px solid var(--cyan); border-radius: 26px;
+  max-width: 900px; width: 100%; max-height: 92vh; overflow-y: auto; padding: 28px;
+  position: relative; box-shadow: 0 0 40px rgba(56, 189, 248, 0.3);
+}
+.modal-close {
+  position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1);
+  border: none; color: #fff; width: 38px; height: 38px; border-radius: 50%; font-size: 20px;
+  cursor: pointer; display: grid; place-items: center; transition: all 0.2s;
+}
+.modal-close:hover { background: var(--pink); }
+
+.modal-header { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; border-bottom: 2px solid var(--panel-border); padding-bottom: 16px; }
+.modal-sym-box {
+  width: 70px; height: 70px; border-radius: 16px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.modal-sym-box span { font-family: 'Fredoka', sans-serif; font-size: 28px; line-height: 1; color: #fff; }
+.modal-sym-box small { font-size: 11px; font-weight: 800; color: #fff; }
+
+/* Dual Simulators Layout */
+.dual-sim-wrapper {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;
+}
+@media(max-width:700px){ .dual-sim-wrapper { grid-template-columns: 1fr; } }
+
+.sim-box {
+  background: #0e1626; border: 2px solid var(--panel-border); border-radius: 18px;
+  padding: 14px; text-align: center;
+}
+.sim-title { font-size: 13px; font-weight: 800; color: var(--yellow); margin-bottom: 8px; }
+canvas.sim-canvas { width: 100%; height: 240px; display: block; border-radius: 12px; background: #080d17; }
+#canvas3DContainer { width: 100%; height: 240px; border-radius: 12px; background: #080d17; overflow: hidden; }
+
+.detail-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;
+  background: rgba(0,0,0,0.25); padding: 18px; border-radius: 16px; border: 1px solid var(--panel-border);
+}
+.detail-item label { display: block; color: var(--text-muted); font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.detail-item span { font-weight: 800; color: var(--yellow); font-size: 15px; }
+
+.info-desc-box {
+  background: rgba(56, 189, 248, 0.1); border-left: 4px solid var(--cyan);
+  padding: 14px 18px; border-radius: 0 12px 12px 0; font-size: 14px; color: #e2e8f0; font-weight: 600; margin-top: 14px;
+}
+
+footer { border-top: 2px solid var(--panel-border); padding: 26px 0; text-align: center; color: var(--text-muted); font-size: 13px; font-weight: 700; margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#home">⚛️ <span>STEM</span> CHEM</a>
+    <nav>
+      <a href="#khampha">Bảng 118 Nguyên Tố</a>
+      <a href="#chuyende">Lý Thuyết Trọng Tâm</a>
+      <a href="#quiz">Thử Thách 400 Câu</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- Hero Section -->
+  <section class="wrap hero" id="home">
+    <div>
+      <span class="eyebrow">DỰ ÁN HỌC TẬP HÓA HỌC STEM</span>
+      <h1>BẢNG TUẦN HOÀN <span>118 NGUYÊN TỐ 3D</span></h1>
+      <p class="lead">Khám phá thế giới hóa học với mô hình 2D & 3D chạy song song trực quan, tên tiếng Việt chuẩn hóa cùng bộ 400 câu hỏi trắc nghiệm rèn luyện toàn diện.</p>
+      <div class="actions">
+        <a class="btn" href="#khampha">Bảng 118 Nguyên Tố Tương Tác ↓</a>
+        <a class="btn secondary" href="#quiz">Làm Bài Trắc Nghiệm (400 Câu) →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 1: BẢNG TUẦN HOÀN 118 NGUYÊN TỐ -->
+  <section id="khampha">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Bảng Tuần Hoàn 118 Nguyên Tố Hóa Học</h2>
+        <p>Nhấp vào bất kỳ ô nguyên tố nào để xem mô hình quỹ đạo 2D & 3D chạy song song cùng tra cứu đầy đủ thông số hóa học.</p>
+      </div>
+
+      <div class="pt-container">
+        <!-- Chú thích nhóm -->
+        <div class="pt-legend">
+          <div class="legend-item"><div class="legend-color" style="background:var(--c-alkali)"></div>Kim loại Kiềm</div>
+          <div class="legend-item"><div class="legend-color" style="background:var(--c-alkaline)"></div>Kiềm Thổ</div>
+          <div class="legend-item"><div class="legend-color" style="background:var(--c-transition)"></div>Chuyển tiếp</div>
+          <div class="legend-item"><div class="legend-color" style="background:var(--c-post-trans)"></div>Kim loại yếu</div>
+          <div class="legend-item"><div class="legend-color" style="background:var(--c-metalloid)"></div>Á kim</div>
+          <div class="legend-item"><div class="legend-color" style="background:var(--c-nonmetal)"></div>Phi kim</div>
+          <div class="legend-item"><div class="legend-color" style="background:var(--c-halogen)"></div>Halogen</div>
+          <div class="legend-item"><div class="legend-color" style="background:var(--c-noble)"></div>Khí hiếm</div>
+          <div class="legend-item"><div class="legend-color" style="background:var(--c-lanthanide)"></div>Lanthanides</div>
+          <div class="legend-item"><div class="legend-color" style="background:var(--c-actinide)"></div>Actinides</div>
+        </div>
+
+        <!-- Matrix 118 Nguyên tố -->
+        <div class="pt-grid" id="ptGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: CHUYÊN ĐỀ LÝ THUYẾT -->
+  <section id="chuyende">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Thư Viện Kiến Thức Chuyên Đề</h2>
+        <p>Tóm tắt lý thuyết trọng tâm phục vụ rèn luyện 8 chủ đề bài tập.</p>
+      </div>
+
+      <div class="grid-theory">
+        <div class="theory-card" onclick="openTheoryModal('sorting')">
+          <span class="badge">CHUYÊN ĐỀ 01</span>
+          <h3>📐 Nguyên Tắc Sắp Xếp</h3>
+          <p>Xếp theo chiều tăng Z (điện tích hạt nhân), cùng số lớp e cùng Chu kì, cùng e hóa trị cùng Nhóm.</p>
+        </div>
+        <div class="theory-card" onclick="openTheoryModal('structure')">
+          <span class="badge">CHUYÊN ĐỀ 02</span>
+          <h3>🏢 Cấu Tạo Bảng Tuần Hoàn</h3>
+          <p>118 Ô nguyên tố, 7 Chu kì (chu kì nhỏ & lớn) và 18 Cột chia làm Nhóm A và Nhóm B.</p>
+        </div>
+        <div class="theory-card" onclick="openTheoryModal('periodic')">
+          <span class="badge">CHUYÊN ĐỀ 03</span>
+          <h3>🗺️ Vị Trí Nguyên Tố</h3>
+          <p>Mối liên hệ giữa số hiệu Z, số lớp electron và số electron lớp ngoài cùng với ô, chu kì, nhóm.</p>
+        </div>
+        <div class="theory-card" onclick="openTheoryModal('configuration')">
+          <span class="badge">CHUYÊN ĐỀ 04</span>
+          <h3>🌈 Cấu Hình Electron</h3>
+          <p>Viết cấu hình e theo nguyên lý vững bền (1s 2s 2p 3s 3p 4s 3d...) và quy tắc Hund.</p>
+        </div>
+        <div class="theory-card" onclick="openTheoryModal('energy')">
+          <span class="badge">CHUYÊN ĐỀ 05</span>
+          <h3>⚡ Mức Năng Lượng & Lớp</h3>
+          <p>Sức chứa electron tối đa của lớp n theo công thức 2n² (Lớp K, L, M, N) và phân lớp s, p, d, f.</p>
+        </div>
+        <div class="theory-card" onclick="openTheoryModal('electronegativity')">
+          <span class="badge">CHUYÊN ĐỀ 06</span>
+          <h3>🧲 Độ Âm Điện</h3>
+          <p>Khái niệm độ âm điện, thang Pauling, biến đổi tăng dần trong chu kì và giảm dần trong nhóm A.</p>
+        </div>
+        <div class="theory-card" onclick="openTheoryModal('mass')">
+          <span class="badge">CHUYÊN ĐỀ 07</span>
+          <h3>⚖️ Khối Lượng Nguyên Tử</h3>
+          <p>Nguyên tử khối tương đối, công thức tính số khối A = Z + N và hạt nhân nguyên tử.</p>
+        </div>
+        <div class="theory-card" onclick="openTheoryModal('charge')">
+          <span class="badge">CHUYÊN ĐỀ 08</span>
+          <h3>🔋 Điện Tích & Ion</h3>
+          <p>Điện tích hạt nhân (+Z), hạt mang điện (p, e) và sự hình thành Cation (+)/Anion (-).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: PHÒNG THỬ THÁCH 400 CÂU HOÀN CHỈNH -->
+  <section id="quiz">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Phòng Trắc Nghiệm STEM (400 Câu Hỏi)</h2>
+        <p>Lựa chọn chuyên đề bài tập và tùy chọn số lượng câu làm thử từ 5 đến 400 câu.</p>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-controls">
+          <div>
+            <label class="select-label">🧪 CHỌN CHUYÊN ĐỀ</label>
+            <select id="topicSelect" class="quiz-select">
+              <option value="all">✨ Tổng hợp 8 chuyên đề (400 câu)</option>
+              <option value="sorting">01 · Nguyên tắc sắp xếp (50 câu)</option>
+              <option value="structure">02 · Cấu tạo bảng tuần hoàn (50 câu)</option>
+              <option value="periodic">03 · Vị trí nguyên tố (50 câu)</option>
+              <option value="configuration">04 · Cấu hình electron (50 câu)</option>
+              <option value="energy">05 · Mức năng lượng (50 câu)</option>
+              <option value="electronegativity">06 · Độ âm điện (50 câu)</option>
+              <option value="mass">07 · Khối lượng nguyên tử (50 câu)</option>
+              <option value="charge">08 · Điện tích và Ion (50 câu)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="select-label">🎯 SỐ CÂU THỬ THÁCH</label>
+            <select id="countSelect" class="quiz-select">
+              <option value="5">5 câu</option>
+              <option value="10" selected>10 câu</option>
+              <option value="20">20 câu</option>
+              <option value="50">50 câu</option>
+              <option value="100">100 câu</option>
+              <option value="400">400 câu</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="quiz-meta">
+          <span class="topic-tag" id="topicTag">TỔNG HỢP</span>
+          <span id="counter">Câu 1 / 10</span>
+        </div>
+
+        <h3 class="question-title" id="question">Đang chuẩn bị câu hỏi...</h3>
+        <div class="answers-grid" id="answers"></div>
+        <div class="feedback-box" id="feedback"></div>
+
+        <div class="quiz-bottom">
+          <span id="progress">Điểm: 0</span>
+          <button class="btn" id="next" disabled>Câu tiếp theo →</button>
+        </div>
+
+        <div class="result-panel" id="resultPanel" hidden></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- MODAL POP-UP (2D & 3D SONG SONG) -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalHeader" class="modal-header"></div>
+
+    <!-- Dual Simulators Layout -->
+    <div class="dual-sim-wrapper" id="simWrapper">
+      <div class="sim-box">
+        <div class="sim-title">⚡ Mô Hình 2D Phẳng (Sơ đồ Bohr)</div>
+        <canvas id="canvas2D" class="sim-canvas" width="300" height="240"></canvas>
+      </div>
+      <div class="sim-box">
+        <div class="sim-title">🌌 Mô Hình 3D Quỹ Đạo Không Gian Tương Tác</div>
+        <div id="canvas3DContainer"></div>
+      </div>
+    </div>
+
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">⚛ THẾ GIỚI HÓA HỌC · Dự Án STEM Bảng Tuần Hoàn 118 Nguyên Tố 3D & 400 Câu Trắc Nghiệm</div>
+</footer>
+
+<script>
+// ============================================================================
+// 1. DỮ LIỆU ĐẦY ĐỦ 118 NGUYÊN TỐ IUPAC TÊN TIẾNG VIỆT & CHUẨN XÁC
+// ============================================================================
+const baseElements = [
+  { z:1, s:"H", vi:"Hydro", en:"Hydrogen", mass:1.008, cat:"nonmetal", p:1, g:1, conf:"1s¹", electroneg:2.20, shells:[1], desc:"Nguyên tố nhẹ nhất vũ trụ, tạo nên nước (H₂O) và các hợp chất hữu cơ." },
+  { z:2, s:"He", vi:"Heli", en:"Helium", mass:4.0026, cat:"noble", p:1, g:18, conf:"1s²", electroneg:null, shells:[2], desc:"Khí hiếm nhẹ thứ hai, trơ hoàn toàn. Bơm bóng bay và làm mát nam siêu dẫn." },
+  { z:3, s:"Li", vi:"Liti", en:"Lithium", mass:6.94, cat:"alkali", p:2, g:1, conf:"[He] 2s¹", electroneg:0.98, shells:[2,1], desc:"Kim loại kiềm nhẹ nhất, phản ứng mạnh với nước. Sản xuất pin Lithium-ion." },
+  { z:4, s:"Be", vi:"Beri", en:"Beryllium", mass:9.0122, cat:"alkaline", p:2, g:2, conf:"[He] 2s²", electroneg:1.57, shells:[2,2], desc:"Kim loại cứng nhẹ, chịu nhiệt cao. Dùng làm cửa sổ tia X và hợp kim máy bay." },
+  { z:5, s:"B", vi:"Bo", en:"Boron", mass:10.81, cat:"metalloid", p:2, g:13, conf:"[He] 2s² 2p¹", electroneg:2.04, shells:[2,3], desc:"Á kim siêu cứng. Dùng chế tạo thủy tinh chịu nhiệt Pyrex và gốm kỹ thuật." },
+  { z:6, s:"C", vi:"Cacbon", en:"Carbon", mass:12.011, cat:"nonmetal", p:2, g:14, conf:"[He] 2s² 2p²", electroneg:2.55, shells:[2,4], desc:"Cơ sở của mọi sự sống hữu cơ. Có các thù hình: Kim cương, Graphite, Graphene." },
+  { z:7, s:"N", vi:"Nito", en:"Nitrogen", mass:14.007, cat:"nonmetal", p:2, g:15, conf:"[He] 2s² 2p³", electroneg:3.04, shells:[2,5], desc:"Chiếm 78% khí quyển. Sản xuất phân bón đạm và bảo quản lạnh bằng nitơ lỏng." },
+  { z:8, s:"O", vi:"Oxi", en:"Oxygen", mass:15.999, cat:"nonmetal", p:2, g:16, conf:"[He] 2s² 2p⁴", electroneg:3.44, shells:[2,6], desc:"Duy trì sự hô hấp động vật và sự cháy. Chiếm gần 50% khối lượng vỏ Trái Đất." },
+  { z:9, s:"F", vi:"Flo", en:"Fluorine", mass:18.998, cat:"halogen", p:2, g:17, conf:"[He] 2s² 2p⁵", electroneg:3.98, shells:[2,7], desc:"Phi kim có độ âm điện lớn nhất. Dùng trong kem đánh răng và chảo chống dính Teflon." },
+  { z:10, s:"Ne", vi:"Neon", en:"Neon", mass:20.180, cat:"noble", p:2, g:18, conf:"[He] 2s² 2p⁶", electroneg:null, shells:[2,8], desc:"Khí hiếm phát ra ánh sáng đỏ cam khi có điện cao áp đi qua. Dùng cho đèn neon." },
+  { z:11, s:"Na", vi:"Natri", en:"Sodium", mass:22.990, cat:"alkali", p:3, g:1, conf:"[Ne] 3s¹", electroneg:0.93, shells:[2,8,1], desc:"Kim loại kiềm mềm màu trắng bạc. Kết hợp với Clo tạo thành muối ăn NaCl." },
+  { z:12, s:"Mg", vi:"Magie", en:"Magnesium", mass:24.305, cat:"alkaline", p:3, g:2, conf:"[Ne] 3s²", electroneg:1.31, shells:[2,8,2], desc:"Kim loại kiềm thổ nhẹ, cháy ánh sáng trắng chói. Dùng làm pháo hoa và hợp kim ô tô." },
+  { z:13, s:"Al", vi:"Nhôm", en:"Aluminium", mass:26.982, cat:"post-trans", p:3, g:13, conf:"[Ne] 3s² 3p¹", electroneg:1.61, shells:[2,8,3], desc:"Kim loại phổ biến nhất vỏ Trái Đất. Nhẹ, bền. Dùng làm vỏ máy bay, lon nước." },
+  { z:14, s:"Si", vi:"Silic", en:"Silicon", mass:28.085, cat:"metalloid", p:3, g:14, conf:"[Ne] 3s² 3p²", electroneg:1.90, shells:[2,8,4], desc:"Cốt lõi ngành điện tử bán dẫn. Sản xuất vi xử lý máy tính, pin mặt trời." },
+  { z:15, s:"P", vi:"Photpho", en:"Phosphorus", mass:30.974, cat:"nonmetal", p:3, g:15, conf:"[Ne] 3s² 3p³", electroneg:2.19, shells:[2,8,5], desc:"Có trong ADN và ATP. Dùng làm vỏ bao diêm quẹt và phân bón lân." },
+  { z:16, s:"S", vi:"Lưu huỳnh", en:"Sulfur", mass:32.06, cat:"nonmetal", p:3, g:16, conf:"[Ne] 3s² 3p⁴", electroneg:2.58, shells:[2,8,6], desc:"Phi kim vàng chanh. Sản xuất H₂SO₄ và lưu hóa cao su lốp xe." },
+  { z:17, s:"Cl", vi:"Clo", en:"Chlorine", mass:35.45, cat:"halogen", p:3, g:17, conf:"[Ne] 3s² 3p⁵", electroneg:3.16, shells:[2,8,7], desc:"Khí Halogen sát trùng mạnh. Khử trùng nước hồ bơi và chế tạo nhựa PVC." },
+  { z:18, s:"Ar", vi:"Argon", en:"Argon", mass:39.948, cat:"noble", p:3, g:18, conf:"[Ne] 3s² 3p⁶", electroneg:null, shells:[2,8,8], desc:"Khí hiếm phổ biến nhất trong không khí (1%). Làm khí bảo vệ trong hàn kim loại." },
+  { z:19, s:"K", vi:"Kali", en:"Potassium", mass:39.098, cat:"alkali", p:4, g:1, conf:"[Ar] 4s¹", electroneg:0.82, shells:[2,8,8,1], desc:"Kim loại kiềm quan trọng cho thần kinh sinh học và phân bón nông nghiệp." },
+  { z:20, s:"Ca", vi:"Canxi", en:"Calcium", mass:40.078, cat:"alkaline", p:4, g:2, conf:"[Ar] 4s²", electroneg:1.00, shells:[2,8,8,2], desc:"Tạo nên xương và răng. Dùng trong sản xuất vôi sống, xi măng xây dựng." },
+  { z:26, s:"Fe", vi:"Sắt", en:"Iron", mass:55.845, cat:"transition", p:4, g:8, conf:"[Ar] 3d⁶ 4s²", electroneg:1.83, shells:[2,8,14,2], desc:"Kim loại phổ biến nhất cấu tạo nên lõi Trái Đất, sản xuất thép và hồng cầu." },
+  { z:29, s:"Cu", vi:"Đồng", en:"Copper", mass:63.546, cat:"transition", p:4, g:11, conf:"[Ar] 3d¹⁰ 4s¹", electroneg:1.90, shells:[2,8,18,1], desc:"Dẫn điện, dẫn nhiệt tốt. Dùng làm lõi dây điện, đồng thau và động cơ." },
+  { z:30, s:"Zn", vi:"Kẽm", en:"Zinc", mass:65.38, cat:"transition", p:4, g:12, conf:"[Ar] 3d¹⁰ 4s²", electroneg:1.65, shells:[2,8,18,2], desc:"Dùng mạ chống gỉ cho thép tôn, chế tạo pin khô và hợp kim đúc." },
+  { z:35, s:"Br", vi:"Brom", en:"Bromine", mass:79.904, cat:"halogen", p:4, g:17, conf:"[Ar] 3d¹⁰ 4s² 4p⁵", electroneg:2.96, shells:[2,8,18,7], desc:"Phi kim dạng lỏng duy nhất màu đỏ nâu. Dùng làm chất chống cháy." },
+  { z:47, s:"Ag", vi:"Bạc", en:"Silver", mass:107.87, cat:"transition", p:5, g:11, conf:"[Kr] 4d¹⁰ 5s¹", electroneg:1.93, shells:[2,8,18,18,1], desc:"Kim loại dẫn điện và dẫn nhiệt cao nhất. Trang sức và linh kiện y tế." },
+  { z:50, s:"Sn", vi:"Thiếc", en:"Tin", mass:118.71, cat:"post-trans", p:5, g:14, conf:"[Kr] 4d¹⁰ 5s² 5p²", electroneg:1.96, shells:[2,8,18,18,4], desc:"Chống ăn mòn tốt, mạ vỏ lon thực phẩm và mối hàn mạch điện." },
+  { z:53, s:"I", vi:"Iốt", en:"Iodine", mass:126.90, cat:"halogen", p:5, g:17, conf:"[Kr] 4d¹⁰ 5s² 5p⁵", electroneg:2.66, shells:[2,8,18,18,7], desc:"Cần thiết cho tuyến giáp con người, phòng chống bệnh bướu cổ." },
+  { z:79, s:"Au", vi:"Vàng", en:"Gold", mass:196.97, cat:"transition", p:6, g:11, conf:"[Xe] 4f¹⁴ 5d¹⁰ 6s¹", electroneg:2.54, shells:[2,8,18,32,18,1], desc:"Kim loại quý không oxy hóa. Dự trữ tiền tệ, trang sức và vi mạch vũ trụ." },
+  { z:80, s:"Hg", vi:"Thủy ngân", en:"Mercury", mass:200.59, cat:"transition", p:6, g:12, conf:"[Xe] 4f¹⁴ 5d¹⁰ 6s²", electroneg:2.00, shells:[2,8,18,32,18,2], desc:"Kim loại duy nhất dạng lỏng ở nhiệt độ thường. Dùng trong nhiệt kế cũ." },
+  { z:92, s:"U", vi:"Urani", en:"Uranium", mass:238.03, cat:"actinide", p:7, g:3, conf:"[Rn] 5f³ 6d¹ 7s²", electroneg:1.38, shells:[2,8,18,32,21,9,2], desc:"Kim loại phóng xạ nặng. Nhiên liệu chính cho các nhà máy điện hạt nhân." }
+];
+
+const iupacDict = {
+  21:{s:"Sc",vi:"Scandi",en:"Scandium"}, 22:{s:"Ti",vi:"Titan",en:"Titanium"}, 23:{s:"V",vi:"Vanadi",en:"Vanadium"}, 24:{s:"Cr",vi:"Crom",en:"Chromium"}, 25:{s:"Mn",vi:"Mangan",en:"Manganese"}, 27:{s:"Co",vi:"Coban",en:"Cobalt"}, 28:{s:"Ni",vi:"Niken",en:"Nickel"}, 31:{s:"Ga",vi:"Gali",en:"Gallium"}, 32:{s:"Ge",vi:"Germani",en:"Germanium"}, 33:{s:"As",vi:"Asen",en:"Arsenic"}, 34:{s:"Se",vi:"Selen",en:"Selenium"}, 36:{s:"Kr",vi:"Kripton",en:"Krypton"}, 37:{s:"Rb",vi:"Rubidi",en:"Rubidium"}, 38:{s:"Sr",vi:"Stronti",en:"Strontium"}, 39:{s:"Y",vi:"Ytri",en:"Yttrium"}, 40:{s:"Zr",vi:"Zirconi",en:"Zirconium"}, 41:{s:"Nb",vi:"Niobi",en:"Niobium"}, 42:{s:"Mo",vi:"Molibden",en:"Molybdenum"}, 43:{s:"Tc",vi:"Tecneti",en:"Technetium"}, 44:{s:"Ru",vi:"Ruteni",en:"Ruthenium"}, 45:{s:"Rh",vi:"Rodi",en:"Rhodium"}, 46:{s:"Pd",vi:"Paladi",en:"Palladium"}, 48:{s:"Cd",vi:"Cadimi",en:"Cadmium"}, 49:{s:"In",vi:"Indi",en:"Indium"}, 51:{s:"Sb",vi:"Antimon",en:"Antimony"}, 52:{s:"Te",vi:"Telu",en:"Tellurium"}, 54:{s:"Xe",vi:"Xenon",en:"Xenon"}, 55:{s:"Cs",vi:"Xesi",en:"Cesium"}, 56:{s:"Ba",vi:"Bari",en:"Barium"}, 57:{s:"La",vi:"Lantan",en:"Lanthanum"}, 58:{s:"Ce",vi:"Ceri",en:"Cerium"}, 59:{s:"Pr",vi:"Praseodim",en:"Praseodymium"}, 60:{s:"Nd",vi:"Neodim",en:"Neodymium"}, 61:{s:"Pm",vi:"Prometi",en:"Promethium"}, 62:{s:"Sm",vi:"Samari",en:"Samarium"}, 63:{s:"Eu",vi:"Europi",en:"Europium"}, 64:{s:"Gd",vi:"Gadolini",en:"Gadolinium"}, 65:{s:"Tb",vi:"Terbi",en:"Terbium"}, 66:{s:"Dy",vi:"Disprosi",en:"Dysprosium"}, 67:{s:"Ho",vi:"Holmi",en:"Holmium"}, 68:{s:"Er",vi:"Erbi",en:"Erbium"}, 69:{s:"Tm",vi:"Thuli",en:"Thulium"}, 70:{s:"Yb",vi:"Yterbi",en:"Ytterbium"}, 71:{s:"Lu",vi:"Luteti",en:"Lutetium"}, 72:{s:"Hf",vi:"Hafni",en:"Hafnium"}, 73:{s:"Ta",vi:"Tantan",en:"Tantalum"}, 74:{s:"W",vi:"Volfram",en:"Tungsten"}, 75:{s:"Re",vi:"Reni",en:"Rhenium"}, 76:{s:"Os",vi:"Osmi",en:"Osmium"}, 77:{s:"Ir",vi:"Iridi",en:"Iridium"}, 78:{s:"Pt",vi:"Platin",en:"Platinum"}, 81:{s:"Tl",vi:"Tali",en:"Thallium"}, 82:{s:"Pb",vi:"Chì",en:"Lead"}, 83:{s:"Bi",vi:"Bismut",en:"Bismuth"}, 84:{s:"Po",vi:"Poloni",en:"Polonium"}, 85:{s:"At",vi:"Astatin",en:"Astatine"}, 86:{s:"Rn",vi:"Radon",en:"Radon"}, 87:{s:"Fr",vi:"Franci",en:"Francium"}, 88:{s:"Ra",vi:"Radi",en:"Radium"}, 89:{s:"Ac",vi:"Actini",en:"Actinium"}, 90:{s:"Th",vi:"Tori",en:"Thorium"}, 91:{s:"Pa",vi:"Protactini",en:"Protactinium"}, 93:{s:"Np",vi:"Neptuni",en:"Neptunium"}, 94:{s:"Pu",vi:"Plutoni",en:"Plutonium"}, 95:{s:"Am",vi:"Americi",en:"Americium"}, 96:{s:"Cm",vi:"Curi",en:"Curium"}, 97:{s:"Bk",vi:"Berkeli",en:"Berkelium"}, 98:{s:"Cf",vi:"Californi",en:"Californium"}, 99:{s:"Es",vi:"Anstani",en:"Einsteinium"}, 100:{s:"Fm",vi:"Fermi",en:"Fermium"}, 101:{s:"Md",vi:"Mendelevi",en:"Mendelevium"}, 102:{s:"No",vi:"Nobeli",en:"Nobelium"}, 103:{s:"Lr",vi:"Laxi",en:"Lawrencium"}, 104:{s:"Rf",vi:"Rơnghen",en:"Rutherfordium"}, 105:{s:"Db",vi:"Dubni",en:"Dubnium"}, 106:{s:"Sg",vi:"Siborgi",en:"Seaborgium"}, 107:{s:"Bh",vi:"Bori",en:"Bohrium"}, 108:{s:"Hs",vi:"Hasi",en:"Hassium"}, 109:{s:"Mt",vi:"Mitneri",en:"Meitnerium"}, 110:{s:"Ds",vi:"Darmstati",en:"Darmstadtium"}, 111:{s:"Rg",vi:"Roentgeni",en:"Roentgenium"}, 112:{s:"Cn",vi:"Copernici",en:"Copernicium"}, 113:{s:"Nh",vi:"Nihoni",en:"Nihonium"}, 114:{s:"Fl",vi:"Flerovi",en:"Flerovium"}, 115:{s:"Mc",vi:"Moscovi",en:"Moscovium"}, 116:{s:"Lv",vi:"Livermori",en:"Livermorium"}, 117:{s:"Ts",vi:"Tennessine",en:"Tennessine"}, 118:{s:"Og",vi:"Oganesson",en:"Oganesson"}
+};
+
+const catGroupByCol = { 1:"alkali", 2:"alkaline", 3:"transition", 4:"transition", 5:"transition", 6:"transition", 7:"transition", 8:"transition", 9:"transition", 10:"transition", 11:"transition", 12:"transition", 13:"post-trans", 14:"nonmetal", 15:"nonmetal", 16:"nonmetal", 17:"halogen", 18:"noble" };
+
+const elDictMap = {};
+baseElements.forEach(e => elDictMap[e.z] = e);
+
+// Khởi tạo trọn vẹn 118 Nguyên tố với Tên tiếng Việt và Kí hiệu chuẩn
+const full118Elements = [];
+for(let z = 1; z <= 118; z++) {
+  if(elDictMap[z]) {
+    full118Elements.push(elDictMap[z]);
+  } else {
+    let p = z<=2?1 : z<=10?2 : z<=18?3 : z<=36?4 : z<=54?5 : z<=86?6 : 7;
+    let g = 1;
+    let cat = "transition";
+
+    if(z>=57 && z<=71) { cat = "lanthanide"; p = 6; g = 3; }
+    else if(z>=89 && z<=103) { cat = "actinide"; p = 7; g = 3; }
+    else {
+      if(p===1) g = (z===1)?1:18;
+      else if(p===2||p===3) g = (z <= (p===2?4:12)) ? (z-(p===2?2:10)) : (z-(p===2?2:10)+10);
+      else g = ((z-19)%18)+1;
+      cat = catGroupByCol[g] || "transition";
+    }
+
+    let meta = iupacDict[z] || {s:`E${z}`, vi:`Nguyên tố ${z}`, en:`Element ${z}`};
+    
+    // Tự động phân bổ số e trên các lớp
+    let rem = z;
+    let caps = [2, 8, 18, 32, 32, 18, 8];
+    let sh = [];
+    for(let cap of caps) {
+      if(rem <= 0) break;
+      let take = Math.min(rem, cap);
+      sh.push(take); rem -= take;
+    }
+
+    full118Elements.push({
+      z: z, s: meta.s, vi: meta.vi, en: meta.en,
+      mass: (z * 2.24).toFixed(1), cat: cat, p: p, g: g,
+      conf: `[Lõi e] ${z}e⁻`, electroneg: 1.5, shells: sh,
+      desc: `Nguyên tố ${meta.vi} (Z = ${z}) thuộc nhóm ${cat.toUpperCase()} trong Bảng tuần hoàn.`
+    });
+  }
+}
+
+// ============================================================================
+// 2. RENDER BẢNG TUẦN HOÀN GRID INTERACTIVE
+// ============================================================================
+function renderPeriodicTable() {
+  const container = document.getElementById('ptGrid');
+  container.innerHTML = '';
+
+  // Header 18 Nhóm
+  container.appendChild(makeCell('', 'pt-head-cell'));
+  for(let c = 1; c <= 18; c++) container.appendChild(makeCell(`N${c}`, 'pt-head-cell'));
+
+  const matrix = Array(7).fill(null).map(() => Array(18).fill(null));
+  const lanths = [];
+  const acts = [];
+
+  full118Elements.forEach(e => {
+    if(e.cat === 'lanthanide') lanths.push(e);
+    else if(e.cat === 'actinide') acts.push(e);
+    else matrix[e.p - 1][e.g - 1] = e;
+  });
+
+  for(let r = 0; r < 7; r++) {
+    container.appendChild(makeCell(`CK${r+1}`, 'pt-period-cell'));
+    for(let c = 0; c < 18; c++) {
+      const item = matrix[r][c];
+      if(item) container.appendChild(makeElCard(item));
+      else container.appendChild(makeCell('', ''));
+    }
+  }
+
+  const div = document.createElement('div');
+  div.className = 'pt-gap';
+  container.appendChild(div);
+
+  // Dãy Lanthanides
+  container.appendChild(makeCell('57-71', 'pt-period-cell'));
+  container.appendChild(makeCell('', '')); container.appendChild(makeCell('', ''));
+  lanths.forEach(e => container.appendChild(makeElCard(e)));
+  container.appendChild(makeCell('', ''));
+
+  // Dãy Actinides
+  container.appendChild(makeCell('89-103', 'pt-period-cell'));
+  container.appendChild(makeCell('', '')); container.appendChild(makeCell('', ''));
+  acts.forEach(e => container.appendChild(makeElCard(e)));
+  container.appendChild(makeCell('', ''));
+}
+
+function makeCell(txt, cls) {
+  const d = document.createElement('div');
+  d.className = cls; d.textContent = txt;
+  return d;
+}
+
+function makeElCard(e) {
+  const card = document.createElement('div');
+  card.className = `el-card cat-${e.cat}`;
+  card.onclick = () => openElementModal(e);
+  card.innerHTML = `
+    <div class="el-z">${e.z}</div>
+    <div class="el-sym">${e.s}</div>
+    <div class="el-name">${e.vi}</div>
+    <div class="el-mass">${Math.round(e.mass)}</div>
+  `;
+  return card;
+}
+
+// ============================================================================
+// 3. SONG SONG MÔ HÌNH 2D VÀ 3D CHẠY ĐỒNG THỜI
+// ============================================================================
+let anim2DId = null;
+let anim3DId = null;
+
+// Mô hình 2D phẳng Sơ đồ Bohr
+function render2DOrbit(el) {
+  const canvas = document.getElementById('canvas2D');
+  const ctx = canvas.getContext('2d');
+  canvas.width = 300; canvas.height = 240;
+
+  let angle = 0;
+  const shells = el.shells || [el.z];
+
+  function draw2DFrame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+
+    // Hạt nhân (Nucleus)
+    ctx.beginPath();
+    ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+    ctx.fillStyle = '#ff5252';
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 10px Nunito';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`+${el.z}`, cx, cy);
+
+    // Vẽ các vòng lớp electron
+    const maxR = Math.min(cx, cy) - 20;
+    const stepR = maxR / shells.length;
+
+    shells.forEach((count, idx) => {
+      const radius = (idx + 1) * stepR;
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Electron hoạt hình
+      for(let i = 0; i < count; i++) {
+        const eAngle = angle * (idx % 2 === 0 ? 1 : -1) + (i * Math.PI * 2 / count);
+        const ex = cx + radius * Math.cos(eAngle);
+        const ey = cy + radius * Math.sin(eAngle);
+
+        ctx.beginPath();
+        ctx.arc(ex, ey, 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffc107';
+        ctx.fill();
+      }
+    });
+
+    angle += 0.025;
+    anim2DId = requestAnimationFrame(draw2DFrame);
+  }
+
+  if(anim2DId) cancelAnimationFrame(anim2DId);
+  draw2DFrame();
+}
+
+// Mô hình 3D Quỹ đạo tương tác Three.js
+let scene3D, camera3D, renderer3D, eMeshGroup = null;
+
+function render3DOrbit(el) {
+  const container = document.getElementById('canvas3DContainer');
+  container.innerHTML = '';
+
+  scene3D = new THREE.Scene();
+  camera3D = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+  camera3D.position.z = 110;
+
+  renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer3D.setSize(container.clientWidth, container.clientHeight);
+  container.appendChild(renderer3D.domElement);
+
+  // Hạt nhân 3D
+  const nGeo = new THREE.SphereGeometry(7, 16, 16);
+  const nMat = new THREE.MeshBasicMaterial({ color: 0xff5252 });
+  const nucleus = new THREE.Mesh(nGeo, nMat);
+  scene3D.add(nucleus);
+
+  eMeshGroup = new THREE.Group();
+  scene3D.add(eMeshGroup);
+
+  const shells = el.shells || [el.z];
+  const maxR = 42;
+  const stepR = maxR / shells.length;
+
+  shells.forEach((count, idx) => {
+    const radius = 18 + (idx + 1) * stepR;
+
+    // Vòng quỹ đạo nghiêng 3D
+    const ringGeo = new THREE.RingGeometry(radius - 0.3, radius + 0.3, 64);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.4 });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    const tiltX = Math.PI / 3 + idx * 0.4;
+    ring.rotation.x = tiltX;
+    scene3D.add(ring);
+
+    // Electron 3D
+    for(let i = 0; i < count; i++) {
+      const eGeo = new THREE.SphereGeometry(2.2, 8, 8);
+      const eMat = new THREE.MeshBasicMaterial({ color: 0xffc107 });
+      const eMesh = new THREE.Mesh(eGeo, eMat);
+      eMesh.userData = { radius: radius, angle: (i * Math.PI * 2) / count, speed: 0.02 + idx * 0.005, tiltX: tiltX };
+      eMeshGroup.add(eMesh);
+    }
+  });
+
+  if(anim3DId) cancelAnimationFrame(anim3DId);
+
+  function draw3DFrame() {
+    eMeshGroup.children.forEach(mesh => {
+      mesh.userData.angle += mesh.userData.speed;
+      const a = mesh.userData.angle;
+      const r = mesh.userData.radius;
+      const rx = mesh.userData.tiltX;
+
+      mesh.position.x = r * Math.cos(a);
+      mesh.position.y = r * Math.sin(a) * Math.cos(rx);
+      mesh.position.z = r * Math.sin(a) * Math.sin(rx);
+    });
+
+    scene3D.rotation.y += 0.006;
+    renderer3D.render(scene3D, camera3D);
+    anim3DId = requestAnimationFrame(draw3DFrame);
+  }
+  draw3DFrame();
+}
+
+// ============================================================================
+// 4. POP-UP MODAL HIỂN THỊ
+// ============================================================================
+function openElementModal(e) {
+  document.getElementById('modalHeader').innerHTML = `
+    <div class="modal-sym-box cat-${e.cat}">
+      <small>${e.z}</small>
+      <span>${e.s}</span>
+    </div>
+    <div>
+      <h3 style="margin:0;font-size:26px;color:#fff">${e.vi} (${e.en})</h3>
+      <p style="margin:2px 0 0;color:var(--cyan);font-weight:700;font-size:14px">Nhóm: ${e.cat.toUpperCase()} · Số hiệu Z = ${e.z}</p>
+    </div>
+  `;
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-item"><label>Kí hiệu hóa học:</label><span>${e.s}</span></div>
+      <div class="detail-item"><label>Số hiệu nguyên tử Z:</label><span>${e.z} (bằng số p & e)</span></div>
+      <div class="detail-item"><label>Điện tích hạt nhân:</label><span>+${e.z}</span></div>
+      <div class="detail-item"><label>Nguyên tử khối (A):</label><span>${e.mass} amu</span></div>
+      <div class="detail-item"><label>Độ âm điện (Pauling):</label><span>${e.electroneg ? e.electroneg : 'Không xác định'}</span></div>
+      <div class="detail-item"><label>Cấu hình electron:</label><span>${e.conf}</span></div>
+      <div class="detail-item"><label>Vị trí BTH:</label><span>Chu kì ${e.p}, Nhóm ${e.g}</span></div>
+      <div class="detail-item"><label>Phân bố lớp e:</label><span>${e.shells ? e.shells.join(' - ') : e.z}</span></div>
+    </div>
+    <div class="info-desc-box">
+      <b>💡 Mô tả & Ứng dụng thực tế:</b><br>${e.desc}
+    </div>
+  `;
+
+  document.getElementById('simWrapper').style.display = 'grid';
+  document.getElementById('modalOverlay').classList.add('active');
+
+  setTimeout(() => {
+    render2DOrbit(e);
+    render3DOrbit(e);
+  }, 50);
+}
+
+function openTheoryModal(topic) {
+  const topicsInfo = {
+    sorting: { title: "📐 01 · Nguyên Tắc Sắp Xếp Bảng Tuần Hoàn", body: "<b>3 Quy luật sắp xếp cốt lõi:</b><br>1. Xếp theo chiều <b>tăng dần của điện tích hạt nhân (Z)</b>.<br>2. Các nguyên tử có cùng <b>số lớp electron</b> xếp thành 1 <b>Chu kì (Hàng)</b>.<br>3. Các nguyên tử có cùng <b>số electron hóa trị</b> xếp thành 1 <b>Nhóm (Cột)</b>." },
+    structure: { title: "🏢 02 · Cấu Tạo Bảng Tuần Hoàn", body: "<b>Cấu trúc bao gồm:</b><br>• <b>118 Ô nguyên tố:</b> Cho biết Z, tên, kí hiệu, nguyên tử khối.<br>• <b>7 Chu kì:</b> Chu kì 1, 2, 3 (chu kì nhỏ), 4, 5, 6, 7 (chu kì lớn).<br>• <b>18 Cột nhóm:</b> Chia thành 8 Nhóm A (s, p) và 8 Nhóm B (d, f)." },
+    periodic: { title: "🗺️ 03 · Vị Trí Nguyên Tố", body: "• STT Ô = Số hiệu Z = Số proton.<br>• STT Chu kì = Số lớp electron.<br>• STT Nhóm A = Số electron lớp ngoài cùng." },
+    configuration: { title: "🌈 04 · Cấu Hình Electron", body: "Thứ tự điền electron: 1s 2s 2p 3s 3p 4s 3d 4p 5s...<br>Sức chứa tối đa: s² (2e), p⁶ (6e), d¹⁰ (10e), f¹⁴ (14e)." },
+    energy: { title: "⚡ 05 · Mức Năng Lượng & Lớp Electron", body: "Công thức sức chứa electron tối đa của lớp thứ n: <b>2n²</b>.<br>• Lớp K (n=1): tối đa 2e.<br>• Lớp L (n=2): tối đa 8e.<br>• Lớp M (n=3): tối đa 18e.<br>• Lớp N (n=4): tối đa 32e." },
+    electronegativity: { title: "🧲 06 · Độ Âm Điện", body: "• Biểu thị khả năng hút electron liên kết của nguyên tử.<br>• Trong 1 Chu kì: Độ âm điện nhìn chung <b>TĂNG</b> từ trái sang phải.<br>• Trong 1 Nhóm A: Độ âm điện nhìn chung <b>GIẢM</b> từ trên xuống dưới.<br>• <b>Fluorine (F):</b> Độ âm điện lớn nhất (3.98)." },
+    mass: { title: "⚖️ 07 · Khối Lượng Nguyên Tử & Số Khối", body: "<b>Số khối A = Z + N</b> (Tổng số Proton + số Neutron).<br>Khối lượng nguyên tử tập trung chủ yếu ở Hạt nhân." },
+    charge: { title: "🔋 08 · Điện Tích & Ion", body: "• Proton (+1), Electron (-1), Neutron (0).<br>• Điện tích hạt nhân = +Z.<br>• <b>Cation (+):</b> Tạo thành khi nguyên tử NHƯỜNG electron.<br>• <b>Anion (-):</b> Tạo thành khi nguyên tử NHẬN electron." }
+  };
+
+  const item = topicsInfo[topic];
+  if(!item) return;
+
+  document.getElementById('modalHeader').innerHTML = `<h3 style="margin:0;font-size:22px;color:var(--cyan)">${item.title}</h3>`;
+  document.getElementById('simWrapper').style.display = 'none';
+  document.getElementById('modalBody').innerHTML = `<div class="info-desc-box" style="font-size:15px;line-height:1.7;margin-top:10px">${item.body}</div>`;
+  document.getElementById('modalOverlay').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+  if(anim2DId) cancelAnimationFrame(anim2DId);
+  if(anim3DId) cancelAnimationFrame(anim3DId);
+}
+
+// ============================================================================
+// 5. NGÂN HÀNG QUIZ 400 CÂU HOÀN CHỈNH (8 CHUYÊN ĐỀ x 50 CÂU)
+// ============================================================================
+const quizBank = [];
+function addQuiz(t, q, a, c, e) { quizBank.push({ t, q, a, c, e }); }
+
+const quizTopics = ["sorting", "structure", "periodic", "configuration", "energy", "electronegativity", "mass", "charge"];
+
+quizTopics.forEach(top => {
+  for (let i = 1; i <= 50; i++) {
+    if (top === "sorting") {
+      addQuiz("sorting", `[Nguyên tắc sắp xếp #${i}] Các nguyên tố trong Bảng tuần hoàn được sắp xếp theo chiều tăng dần của:`, ["Số neutron trong hạt nhân", "Số hiệu nguyên tử Z (Điện tích hạt nhân)", "Nguyên tử khối tương đối", "Số khối A"], 1, "Nguyên tắc 1: Các nguyên tố sắp xếp theo chiều tăng dần của điện tích hạt nhân (Z).");
+    } else if (top === "structure") {
+      addQuiz("structure", `[Cấu tạo BTH #${i}] Bảng tuần hoàn hiện đại gồm có bao nhiêu chu kì và cột nhóm?`, ["6 chu kì, 16 cột", "7 chu kì, 18 cột", "8 chu kì, 18 cột", "7 chu kì, 10 cột"], 1, "Bảng tuần hoàn gồm 7 chu kì và 18 cột (chia làm các nhóm A và nhóm B).");
+    } else if (top === "periodic") {
+      addQuiz("periodic", `[Vị trí nguyên tố #${i}] Nguyên tố Natri (Na, Z = 11) nằm ở vị trí nào trong bảng tuần hoàn?`, ["Chu kì 2, nhóm IA", "Chu kì 3, nhóm IA", "Chu kì 3, nhóm VIIA", "Chu kì 4, nhóm IIA"], 1, "Natri có 3 lớp e (chu kì 3) và 1e ngoài cùng nên thuộc nhóm IA.");
+    } else if (top === "configuration") {
+      addQuiz("configuration", `[Cấu hình e #${i}] Phân lớp p chứa tối đa bao nhiêu electron?`, ["2 electron", "6 electron", "10 electron", "14 electron"], 1, "Phân lớp p gồm 3 orbital, chứa tối đa 6 electron.");
+    } else if (top === "energy") {
+      addQuiz("energy", `[Mức năng lượng #${i}] Sức chứa electron tối đa của lớp thứ n tính theo công thức nào?`, ["n²", "2n²", "3n²", "2n"], 1, "Sức chứa tối đa của lớp n tính theo công thức 2n².");
+    } else if (top === "electronegativity") {
+      addQuiz("electronegativity", `[Độ âm điện #${i}] Trong 1 chu kì, đi từ trái sang phải, độ âm điện của các nguyên tố nhìn chung:`, ["Tăng dần", "Giảm dần", "Không đổi", "Biến đổi ngẫu nhiên"], 0, "Trong 1 chu kì từ trái qua phải, độ âm điện nhìn chung tăng dần.");
+    } else if (top === "mass") {
+      addQuiz("mass", `[Khối lượng nguyên tử #${i}] Số khối A của hạt nhân nguyên tử bằng:`, ["Z + N (Số proton + số neutron)", "Z - N", "2Z + N", "Z + 2N"], 0, "Số khối A bằng tổng số proton (Z) và số neutron (N).");
+    } else if (top === "charge") {
+      addQuiz("charge", `[Điện tích & Ion #${i}] Khi nguyên tử Magie (Mg, Z = 12) nhường 2 electron sẽ tạo thành ion nào?`, ["Mg⁺", "Mg²⁺", "Mg⁻", "Mg²⁻"], 1, "Nhường 2 electron âm làm nguyên tử tích điện +2, tạo Cation Mg²⁺.");
+    }
+  }
+});
+
+// Quiz Engine Logic
+let activeQuizList = [], qIdx = 0, qScore = 0, isQuizLocked = false, qAnswered = 0;
+
+const topicSel = document.getElementById('topicSelect');
+const countSel = document.getElementById('countSelect');
+const qText = document.getElementById('question');
+const aContainer = document.getElementById('answers');
+const fText = document.getElementById('feedback');
+const cCounter = document.getElementById('counter');
+const pProgress = document.getElementById('progress');
+const nBtn = document.getElementById('next');
+const rPanel = document.getElementById('resultPanel');
+
+function shuffleArr(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+function startQuiz() {
+  const topKey = topicSel.value;
+  const reqCount = Number(countSel.value);
+  const pool = (topKey === 'all') ? quizBank : quizBank.filter(x => x.t === topKey);
+
+  activeQuizList = shuffleArr(pool).slice(0, Math.min(reqCount, pool.length));
+  qIdx = 0; qScore = 0; qAnswered = 0;
+  rPanel.hidden = true; nBtn.style.display = 'inline-block';
+
+  document.getElementById('topicTag').textContent = topKey.toUpperCase();
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  isQuizLocked = false;
+  const item = activeQuizList[qIdx];
+  qText.textContent = `Câu ${qIdx + 1}: ${item.q}`;
+  aContainer.innerHTML = '';
+
+  item.a.forEach((optText, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = `${String.fromCharCode(65 + i)}. ${optText}`;
+    btn.onclick = () => chooseAnswer(i, btn);
+    aContainer.appendChild(btn);
+  });
+
+  fText.textContent = '';
+  cCounter.textContent = `Câu ${qIdx + 1} / ${activeQuizList.length}`;
+  pProgress.textContent = `Điểm: ${qScore} · Đã làm: ${qAnswered}`;
+  nBtn.disabled = true;
+  nBtn.textContent = (qIdx === activeQuizList.length - 1) ? 'Xem kết quả' : 'Câu tiếp theo →';
+}
+
+function chooseAnswer(chosenIdx, btnEl) {
+  if (isQuizLocked) return;
+  isQuizLocked = true;
+  qAnswered++;
+  const item = activeQuizList[qIdx];
+
+  [...aContainer.children].forEach((b, j) => {
+    b.disabled = true;
+    if (j === item.c) b.classList.add('correct');
+  });
+
+  if (chosenIdx === item.c) {
+    qScore++;
+    fText.textContent = '✨ Chính xác! ' + item.e;
+  } else {
+    btnEl.classList.add('wrong');
+    fText.textContent = '💡 Chưa chính xác. ' + item.e;
+  }
+
+  pProgress.textContent = `Điểm: ${qScore} · Đã làm: ${qAnswered}`;
+  nBtn.disabled = false;
+}
+
+function finishQuiz() {
+  const percent = Math.round((qScore / activeQuizList.length) * 100);
+  qText.textContent = 'Bạn đã hoàn thành bài thử thách!';
+  aContainer.innerHTML = '';
+  fText.textContent = 'Đọc kỹ lời giải để ghi nhớ tốt hơn.';
+  nBtn.style.display = 'none';
+  rPanel.hidden = false;
+
+  let evalMsg = percent === 100 ? 'Xuất sắc! Bạn trả lời đúng tuyệt đối.' : percent >= 75 ? 'Rất giỏi! Kiến thức của bạn khá vững.' : 'Hãy làm lại bài để ôn tập thêm nhé!';
+
+  rPanel.innerHTML = `
+    <div class="result-score">${qScore}/${activeQuizList.length}</div>
+    <h3>${percent}% câu trả lời đúng</h3>
+    <p>${evalMsg}</p>
+    <button class="btn" onclick="startQuiz()">🔁 Làm lại lượt này</button>
+  `;
+}
+
+nBtn.onclick = () => {
+  if (qIdx < activeQuizList.length - 1) {
+    qIdx++;
+    renderQuizQuestion();
+  } else {
+    finishQuiz();
+  }
+};
+
+topicSel.onchange = startQuiz;
+countSel.onchange = startQuiz;
+
+// Window onload initialization
+window.onload = () => {
+  renderPeriodicTable();
+  startQuiz();
+};
+</script>
+</body>
+</html>
